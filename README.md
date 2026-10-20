@@ -1,4 +1,4 @@
-# Distributed Pong League
+# Pong Swarm
 
 A living simulation of a competitive multiplayer Pong game, where virtual players compete continuously and climb the rankings, while visitors watch matches and system activity live.
 
