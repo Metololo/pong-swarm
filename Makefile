@@ -13,7 +13,7 @@ build:
 	go build -o bin/server ./cmd/server
 
 run: build
-	./bin/server
+	./bin/Server
 
 fmt:
 	gofmt -s -w .
