@@ -9,9 +9,8 @@ import (
 )
 
 const (
-	screenWidth     = 800
-	screenHeight    = 400
-	dashHeight      = 8
+	screenWidth     = pong.ArenaWidth
+	screenHeight    = pong.ArenaHeight
 	gap             = 8
 	lineWidth       = 8
 	borderThickness = 16
@@ -32,6 +31,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	g.drawCenterLine(screen)
 	g.drawBorders(screen)
+	g.DrawPaddles(screen)
+	g.DrawBall(screen)
 }
 
 func (g *Game) drawBorders(screen *ebiten.Image) {
@@ -47,11 +48,51 @@ func (g *Game) drawBorders(screen *ebiten.Image) {
 func (g *Game) drawCenterLine(screen *ebiten.Image) {
 	x := (screenWidth - lineWidth) / 2
 
-	for y := borderThickness; y < screenHeight-borderThickness; y += dashHeight + gap {
+	for y := borderThickness; y < screenHeight-borderThickness; y += int(g.pongGame.Ball().Size()) + gap {
 		for dx := 0; dx < lineWidth; dx++ {
-			for dy := 0; dy < dashHeight && y+dy < screenHeight; dy++ {
+			for dy := 0; dy < int(g.pongGame.Ball().Size()) && y+dy < screenHeight; dy++ {
 				screen.Set(x+dx, y+dy, elementsColor)
 			}
+		}
+	}
+}
+
+func (g *Game) DrawPaddles(screen *ebiten.Image) {
+	leftPaddle, rightPaddle := g.pongGame.Paddles()
+
+	g.drawLeftPaddle(screen, leftPaddle)
+	g.drawRightPaddle(screen, rightPaddle)
+}
+
+func (g *Game) drawLeftPaddle(screen *ebiten.Image, paddle pong.Paddle) {
+	x, y := paddle.Position()
+	width, height := paddle.Dimensions()
+
+	for dx := 0; dx < int(width); dx++ {
+		for dy := 0; dy < int(height); dy++ {
+			screen.Set(int(x)+dx, int(y)+dy, color.RGBA{R: 200, G: 0, B: 0, A: 150})
+		}
+	}
+}
+
+func (g *Game) drawRightPaddle(screen *ebiten.Image, paddle pong.Paddle) {
+	x, y := paddle.Position()
+	width, height := paddle.Dimensions()
+
+	for dx := 0; dx < int(width); dx++ {
+		for dy := 0; dy < int(height); dy++ {
+			screen.Set(int(x)+dx, int(y)+dy, color.RGBA{R: 0, G: 0, B: 200, A: 150})
+		}
+	}
+}
+func (g *Game) DrawBall(screen *ebiten.Image) {
+	ball := g.pongGame.Ball()
+	x, y := ball.Position()
+	size := ball.Size()
+
+	for dx := 0; dx < int(size); dx++ {
+		for dy := 0; dy < int(size); dy++ {
+			screen.Set(int(x)+dx, int(y)+dy, color.RGBA{R: 250, G: 250, B: 250, A: 150})
 		}
 	}
 }
@@ -60,11 +101,7 @@ func (g *Game) Layout(_, _ int) (int, int) {
 }
 
 func main() {
-	gameCfg := pong.DefaultConfig()
-	game, err := pong.NewGame(gameCfg)
-	if err != nil {
-		log.Fatalf("Failed to initialize game: %v", err)
-	}
+	game := pong.NewGame()
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Pong Swarm")

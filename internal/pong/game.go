@@ -1,24 +1,51 @@
 package pong
 
-import "fmt"
-
-var ErrInvalidArenaWidth = fmt.Errorf("invalid arena width: must be positive")
-var ErrInvalidArenaHeight = fmt.Errorf("invalid arena height: must be positive")
+/*
+using hard-coded values and unchangeable config for now to not overcomplicate the project as pong itself is not the main focus.
+*/
+const (
+	ArenaWidth  = 800
+	ArenaHeight = 600
+)
 
 type Game struct {
-	config Config
+	ball        Ball
+	leftPaddle  Paddle
+	rightPaddle Paddle
 }
 
-func NewGame(cfg Config) (*Game, error) {
-	if cfg.ArenaWidth <= 0 {
-		return nil, ErrInvalidArenaWidth
+func NewGame() *Game {
+	return &Game{
+		ball: Ball{
+			x:    392,
+			y:    292,
+			size: 16,
+		},
+		leftPaddle: Paddle{
+			x:      20,
+			y:      260,
+			width:  12,
+			height: 80,
+			speed:  250,
+		},
+		rightPaddle: Paddle{
+			x:      768,
+			y:      260,
+			width:  12,
+			height: 80,
+			speed:  250,
+		},
 	}
-	if cfg.ArenaHeight <= 0 {
-		return nil, ErrInvalidArenaHeight
-	}
-	return &Game{config: cfg}, nil
 }
 
-func (g *Game) Dimensions() (width, height int) {
-	return g.config.ArenaWidth, g.config.ArenaHeight
+func (g *Game) Dimensions() (int, int) {
+	return ArenaWidth, ArenaHeight
+}
+
+func (g *Game) Ball() Ball {
+	return g.ball
+}
+
+func (g *Game) Paddles() (Paddle, Paddle) {
+	return g.leftPaddle, g.rightPaddle
 }
