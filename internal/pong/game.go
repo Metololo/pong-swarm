@@ -80,6 +80,39 @@ func (g *Game) Step(dt float64) {
 	}
 
 	g.ball.move(dt)
+	g.handleBallCollision()
+}
+func (g *Game) handleBallCollision() {
+	if g.ball.y <= 0 && g.ball.vy < 0 {
+		g.ball.y = 0
+		g.ball.vy = -g.ball.vy
+	}
+
+	if g.ball.y+g.ball.size >= ArenaHeight && g.ball.vy > 0 {
+		g.ball.y = ArenaHeight - g.ball.size
+		g.ball.vy = -g.ball.vy
+	}
+
+	if g.ball.vx < 0 && g.checkPaddleCollision(g.leftPaddle) {
+		g.ball.x = g.leftPaddle.x + g.leftPaddle.width
+		g.ball.vx = BallPlaySpeed
+	}
+
+	if g.ball.vx > 0 && g.checkPaddleCollision(g.rightPaddle) {
+		g.ball.x = g.rightPaddle.x - g.ball.size
+		g.ball.vx = -BallPlaySpeed
+	}
+}
+
+func (g *Game) checkPaddleCollision(paddle Paddle) bool {
+	ballX, ballY := g.ball.Position()
+	paddleX, paddleY := paddle.Position()
+	paddleWidth, paddleHeight := paddle.Dimensions()
+
+	return ballX < paddleX+paddleWidth &&
+		ballX+g.ball.size > paddleX &&
+		ballY < paddleY+paddleHeight &&
+		ballY+g.ball.size > paddleY
 }
 
 func (g *Game) MoveLeftPaddleUp(dt float64) {
