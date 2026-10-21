@@ -2,7 +2,6 @@ package pong
 
 import "testing"
 
-// write test for ball move
 func TestBallShouldMove(t *testing.T) {
 	ball := Ball{
 		x:  100,

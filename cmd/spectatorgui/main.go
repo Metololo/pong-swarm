@@ -3,9 +3,11 @@ package main
 import (
 	"image/color"
 	"log"
+	"strconv"
 
 	"github.com/Metololo/pong-swarm/internal/pong"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
@@ -50,14 +52,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// g.drawBorders(screen)
 	g.DrawPaddles(screen)
 	g.DrawBall(screen)
+	g.DrawScore(screen)
+
+	if g.pongGame.Status() == pong.Finished {
+		winner := "Left player wins!"
+		if g.pongGame.RightScore() >= pong.WinningScore {
+			winner = "Right player wins!"
+		}
+
+		ebitenutil.DebugPrintAt(screen, winner, screenWidth/2-60, screenHeight/2)
+	}
 }
 
 func (g *Game) drawBorders(screen *ebiten.Image) {
 
 	for x := 0; x < screenWidth; x++ {
 		for dy := 0; dy < borderThickness; dy++ {
-			screen.Set(x, dy, elementsColor)                // Top
-			screen.Set(x, screenHeight-1-dy, elementsColor) // Bottom
+			screen.Set(x, dy, elementsColor)
+			screen.Set(x, screenHeight-1-dy, elementsColor)
 		}
 	}
 }
@@ -113,6 +125,15 @@ func (g *Game) DrawBall(screen *ebiten.Image) {
 		}
 	}
 }
+
+func (g *Game) DrawScore(screen *ebiten.Image) {
+	leftScore := strconv.Itoa(g.pongGame.LeftScore())
+	rightScore := strconv.Itoa(g.pongGame.RightScore())
+
+	ebitenutil.DebugPrintAt(screen, leftScore, screenWidth/2-80, 50)
+	ebitenutil.DebugPrintAt(screen, rightScore, screenWidth/2+80, 50)
+}
+
 func (g *Game) Layout(_, _ int) (int, int) {
 	return screenWidth, screenHeight
 }

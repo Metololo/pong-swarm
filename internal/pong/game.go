@@ -14,6 +14,7 @@ const (
 	BallServeSpeed = 400.0
 	BallPlaySpeed  = 700.0
 	PaddleSpeed    = 350.0
+	WinningScore   = 5
 )
 
 type GameStatus int
@@ -31,6 +32,7 @@ type Game struct {
 	leftScore   int
 	rightScore  int
 	status      GameStatus
+	serveDelay  float64
 }
 
 func (g *Game) Status() GameStatus {
@@ -65,17 +67,26 @@ func NewGame() *Game {
 }
 
 func (g *Game) Start() {
+	if g.status != NotStarted {
+		return
+	}
+
 	g.status = InProgress
-	g.serveBall()
+
+	direction := 1.0
+	if rand.IntN(2) == 0 {
+		direction = -1
+	}
+
+	g.serveBall(direction, 0)
 }
 
-func (g *Game) serveBall() {
-	g.ball.vx = BallServeSpeed
-	g.ball.vy = 0
+func (g *Game) serveBall(direction, angle float64) {
+	g.ball.x = (ArenaWidth - g.ball.size) / 2
+	g.ball.y = (ArenaHeight - g.ball.size) / 2
 
-	if rand.IntN(2) == 0 {
-		g.ball.vx = -g.ball.vx
-	}
+	g.ball.vx = direction * BallServeSpeed * math.Cos(angle)
+	g.ball.vy = BallServeSpeed * math.Sin(angle)
 }
 
 func (g *Game) Step(dt float64) {
@@ -83,9 +94,47 @@ func (g *Game) Step(dt float64) {
 		return
 	}
 
+	if g.serveDelay > 0 {
+		g.serveDelay -= dt
+		if g.serveDelay >= 0 {
+			return
+		}
+
+		dt = -g.serveDelay
+		g.serveDelay = 0
+	}
+
 	g.ball.move(dt)
 	g.handleBallCollision()
+	g.checkScore()
 }
+func (g *Game) checkScore() {
+	var serveDirection float64
+
+	if g.ball.x+g.ball.size <= 0 {
+		g.rightScore++
+		serveDirection = -1
+	} else if g.ball.x >= ArenaWidth {
+		g.leftScore++
+		serveDirection = 1
+	} else {
+		return
+	}
+
+	if g.leftScore >= WinningScore || g.rightScore >= WinningScore {
+		g.status = Finished
+		g.ball.vx = 0
+		g.ball.vy = 0
+		return
+	}
+
+	const maxServeAngle = math.Pi / 6
+	angle := (rand.Float64()*2 - 1) * maxServeAngle
+
+	g.serveBall(serveDirection, angle)
+	g.serveDelay = 1.0
+}
+
 func (g *Game) handleBallCollision() {
 	if g.ball.y <= 0 && g.ball.vy < 0 {
 		g.ball.y = 0
@@ -134,18 +183,30 @@ func (g *Game) bounceOffPaddle(paddle Paddle, direction float64) {
 }
 
 func (g *Game) MoveLeftPaddleUp(dt float64) {
+	if g.status != InProgress {
+		return
+	}
 	g.leftPaddle.moveUp(dt)
 }
 
 func (g *Game) MoveLeftPaddleDown(dt float64) {
+	if g.status != InProgress {
+		return
+	}
 	g.leftPaddle.moveDown(dt)
 }
 
 func (g *Game) MoveRightPaddleUp(dt float64) {
+	if g.status != InProgress {
+		return
+	}
 	g.rightPaddle.moveUp(dt)
 }
 
 func (g *Game) MoveRightPaddleDown(dt float64) {
+	if g.status != InProgress {
+		return
+	}
 	g.rightPaddle.moveDown(dt)
 }
 
@@ -159,4 +220,12 @@ func (g *Game) Ball() Ball {
 
 func (g *Game) Paddles() (Paddle, Paddle) {
 	return g.leftPaddle, g.rightPaddle
+}
+
+func (g *Game) LeftScore() int {
+	return g.leftScore
+}
+
+func (g *Game) RightScore() int {
+	return g.rightScore
 }
