@@ -1,15 +1,19 @@
 package pong
 
-import "math/rand/v2"
+import (
+	"math"
+	"math/rand/v2"
+)
 
 /*
-using hard-coded values and unchangeable config for now to not overcomplicate the project as pong itself is not the main focus.
+using hard-coded values and unchangeable config as pong itself is not the main focus.
 */
 const (
 	ArenaWidth     = 800
 	ArenaHeight    = 600
-	BallServeSpeed = 200.0
-	BallPlaySpeed  = 350.0
+	BallServeSpeed = 400.0
+	BallPlaySpeed  = 700.0
+	PaddleSpeed    = 350.0
 )
 
 type GameStatus int
@@ -45,14 +49,14 @@ func NewGame() *Game {
 			y:      260,
 			width:  12,
 			height: 80,
-			speed:  250,
+			speed:  PaddleSpeed,
 		},
 		rightPaddle: Paddle{
 			x:      768,
 			y:      260,
 			width:  12,
 			height: 80,
-			speed:  250,
+			speed:  PaddleSpeed,
 		},
 		status:     NotStarted,
 		leftScore:  0,
@@ -95,12 +99,12 @@ func (g *Game) handleBallCollision() {
 
 	if g.ball.vx < 0 && g.checkPaddleCollision(g.leftPaddle) {
 		g.ball.x = g.leftPaddle.x + g.leftPaddle.width
-		g.ball.vx = BallPlaySpeed
+		g.bounceOffPaddle(g.leftPaddle, 1)
 	}
 
 	if g.ball.vx > 0 && g.checkPaddleCollision(g.rightPaddle) {
 		g.ball.x = g.rightPaddle.x - g.ball.size
-		g.ball.vx = -BallPlaySpeed
+		g.bounceOffPaddle(g.rightPaddle, -1)
 	}
 }
 
@@ -113,6 +117,20 @@ func (g *Game) checkPaddleCollision(paddle Paddle) bool {
 		ballX+g.ball.size > paddleX &&
 		ballY < paddleY+paddleHeight &&
 		ballY+g.ball.size > paddleY
+}
+
+func (g *Game) bounceOffPaddle(paddle Paddle, direction float64) {
+	ballCenter := g.ball.y + g.ball.size/2
+	paddleCenter := paddle.y + paddle.height/2
+
+	offset := (ballCenter - paddleCenter) / (paddle.height / 2)
+	offset = math.Max(-1, math.Min(1, offset))
+
+	const maxAngle = math.Pi / 3
+	angle := offset * maxAngle
+
+	g.ball.vx = direction * BallPlaySpeed * math.Cos(angle)
+	g.ball.vy = BallPlaySpeed * math.Sin(angle)
 }
 
 func (g *Game) MoveLeftPaddleUp(dt float64) {
