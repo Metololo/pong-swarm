@@ -23,10 +23,22 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	if g.pongGame.Status() == pong.NotStarted {
-		g.pongGame.Start()
-	}
 	dt := 1.0 / float64(ebiten.TPS())
+
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		g.pongGame.MoveLeftPaddleUp(dt)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyS) {
+		g.pongGame.MoveLeftPaddleDown(dt)
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		g.pongGame.MoveRightPaddleUp(dt)
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		g.pongGame.MoveRightPaddleDown(dt)
+	}
+
 	g.pongGame.Step(dt)
 	return nil
 }
@@ -35,7 +47,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.Black)
 
 	g.drawCenterLine(screen)
-	g.drawBorders(screen)
+	// g.drawBorders(screen)
 	g.DrawPaddles(screen)
 	g.DrawBall(screen)
 }
@@ -111,7 +123,11 @@ func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Pong Swarm")
 
-	if err := ebiten.RunGame(&Game{pongGame: game}); err != nil {
+	g := &Game{pongGame: game}
+	if g.pongGame.Status() == pong.NotStarted {
+		g.pongGame.Start()
+	}
+	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -82,6 +82,22 @@ func (g *Game) Step(dt float64) {
 	g.ball.move(dt)
 }
 
+func (g *Game) MoveLeftPaddleUp(dt float64) {
+	g.leftPaddle.moveUp(dt)
+}
+
+func (g *Game) MoveLeftPaddleDown(dt float64) {
+	g.leftPaddle.moveDown(dt)
+}
+
+func (g *Game) MoveRightPaddleUp(dt float64) {
+	g.rightPaddle.moveUp(dt)
+}
+
+func (g *Game) MoveRightPaddleDown(dt float64) {
+	g.rightPaddle.moveDown(dt)
+}
+
 func (g *Game) Dimensions() (int, int) {
 	return ArenaWidth, ArenaHeight
 }
