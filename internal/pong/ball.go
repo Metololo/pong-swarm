@@ -17,3 +17,8 @@ func (b Ball) Velocity() (float64, float64) {
 func (b Ball) Size() float64 {
 	return b.size
 }
+
+func (b *Ball) move(dt float64) {
+	b.x += b.vx * dt
+	b.y += b.vy * dt
+}

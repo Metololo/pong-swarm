@@ -11,7 +11,7 @@ import (
 const (
 	screenWidth     = pong.ArenaWidth
 	screenHeight    = pong.ArenaHeight
-	gap             = 8
+	gap             = 16
 	lineWidth       = 8
 	borderThickness = 16
 )
@@ -23,6 +23,11 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
+	if g.pongGame.Status() == pong.NotStarted {
+		g.pongGame.Start()
+	}
+	dt := 1.0 / float64(ebiten.TPS())
+	g.pongGame.Step(dt)
 	return nil
 }
 

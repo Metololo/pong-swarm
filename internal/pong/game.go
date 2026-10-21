@@ -1,17 +1,36 @@
 package pong
 
+import "math/rand/v2"
+
 /*
 using hard-coded values and unchangeable config for now to not overcomplicate the project as pong itself is not the main focus.
 */
 const (
-	ArenaWidth  = 800
-	ArenaHeight = 600
+	ArenaWidth     = 800
+	ArenaHeight    = 600
+	BallServeSpeed = 200.0
+	BallPlaySpeed  = 350.0
+)
+
+type GameStatus int
+
+const (
+	NotStarted GameStatus = iota
+	InProgress
+	Finished
 )
 
 type Game struct {
 	ball        Ball
 	leftPaddle  Paddle
 	rightPaddle Paddle
+	leftScore   int
+	rightScore  int
+	status      GameStatus
+}
+
+func (g *Game) Status() GameStatus {
+	return g.status
 }
 
 func NewGame() *Game {
@@ -35,7 +54,32 @@ func NewGame() *Game {
 			height: 80,
 			speed:  250,
 		},
+		status:     NotStarted,
+		leftScore:  0,
+		rightScore: 0,
 	}
+}
+
+func (g *Game) Start() {
+	g.status = InProgress
+	g.serveBall()
+}
+
+func (g *Game) serveBall() {
+	g.ball.vx = BallServeSpeed
+	g.ball.vy = 0
+
+	if rand.IntN(2) == 0 {
+		g.ball.vx = -g.ball.vx
+	}
+}
+
+func (g *Game) Step(dt float64) {
+	if g.status != InProgress {
+		return
+	}
+
+	g.ball.move(dt)
 }
 
 func (g *Game) Dimensions() (int, int) {
