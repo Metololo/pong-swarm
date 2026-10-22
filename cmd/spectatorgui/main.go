@@ -49,7 +49,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.Black)
 
 	g.drawCenterLine(screen)
-	// g.drawBorders(screen)
 	g.DrawPaddles(screen)
 	g.DrawBall(screen)
 	g.DrawScore(screen)
@@ -61,16 +60,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		ebitenutil.DebugPrintAt(screen, winner, screenWidth/2-60, screenHeight/2)
-	}
-}
-
-func (g *Game) drawBorders(screen *ebiten.Image) {
-
-	for x := 0; x < screenWidth; x++ {
-		for dy := 0; dy < borderThickness; dy++ {
-			screen.Set(x, dy, elementsColor)
-			screen.Set(x, screenHeight-1-dy, elementsColor)
-		}
 	}
 }
 
